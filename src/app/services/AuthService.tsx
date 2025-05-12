@@ -1,50 +1,38 @@
-import axios from 'axios';
-
-const BASE_URL = 'https://computer-point-service-production.up.railway.app';
+import { createApi } from '../constants/AuthConstants';
 
 export interface SignupData {
-    firstName: string;
-    lastName: string;
+    username: string;
     email: string;
     password: string;
 }
 
-const api = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-});
+export interface LoginData {
+    email: string;
+    password: string;
+}
 
 export const signup = async (userData: SignupData) => {
     try {
-        const response = await api.post('/auth/signup', userData);
+        const response = await createApi.post('api/auth/register', userData);
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            throw new Error(error.response?.data?.message || 'An error occurred during signup');
+        if (error instanceof Error && 'response' in error) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            throw new Error(axiosError.response?.data?.message || 'An error occurred during signup');
         }
         throw new Error('An unexpected error occurred');
     }
 };
 
-// Example usage in a React component:
-/*
-import { signup, SignupData } from '../services/AuthService';
-
-const SignupComponent = () => {
-    const handleSignup = async (userData: SignupData) => {
-        try {
-            const response = await signup(userData);
-            // Handle successful signup
-        } catch (error) {
-            // Handle error
-            console.error(error);
+export const login = async (userData: LoginData) => {
+    try {
+        const response = await createApi.post('api/auth/login', userData);
+        return response.data;
+    } catch (error) {
+        if (error instanceof Error && 'response' in error) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            throw new Error(axiosError.response?.data?.message || 'Invalid email or password');
         }
-    };
-
-    return (
-        // Your signup form JSX
-    );
+        throw new Error('An unexpected error occurred');
+    }
 };
-*/
